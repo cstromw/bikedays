@@ -438,7 +438,14 @@ async function fetchData(lat, long) {
 
 async function updateLocation() {
   if (Object.hasOwn(currentLocation, 'id')) {
-    document.getElementById("averageAnnualTotalLabel").textContent = `average rideable days a year in ${currentLocation.name}, ${currentLocation.region}, ${currentLocation.country}`;
+    var fullName = currentLocation.name;
+    if (currentLocation.region != null) {
+      fullName += `, ${currentLocation.region}`;
+    }
+    if (currentLocation.country != null) {
+      fullName += `, ${currentLocation.country}`;
+    }
+    document.getElementById("averageAnnualTotalLabel").textContent = `average rideable days a year in ${fullName}`;
     if (!Object.hasOwn(weatherDataCache[units], currentLocation.id)) {
       // No data cached, initialize totals and fetch data
       averageAnnualTotals[currentLocation.id] = Array(3).fill(0);
@@ -463,7 +470,14 @@ async function showLocations(name) {
   if (locationList.length > 0) {
     locationList.forEach((locationOption) => {
       var listItem = document.createElement('li');
-      listItem.textContent = `${locationOption.name}, ${locationOption.region}, ${locationOption.country} (${locationOption.lat}, ${locationOption.long})`;
+      var fullName = locationOption.name;
+      if (locationOption.region != null) {
+        fullName += `, ${locationOption.region}`;
+      }
+      if (locationOption.country != null) {
+        fullName += `, ${locationOption.country}`;
+      }
+      listItem.textContent = `${fullName} (${locationOption.lat}, ${locationOption.long})`;
       listItem.addEventListener('click', () => {
         currentLocation = { ...locationOption };
         updateLocation();
