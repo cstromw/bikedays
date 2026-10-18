@@ -6,4 +6,4 @@ Configure port value at the top of `server.js`, then run:
 npm install
 node server.js
 ```
-Open `localhost:[port]' in your local browser to view
+Open `localhost:[port]` in your local browser to view
