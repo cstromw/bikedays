@@ -283,14 +283,16 @@ function updateAverages() {
 function updateRideability(yearToUpdate) {
   // Recurse over all years if requested
   if (yearToUpdate === 'all') {
-    Object.keys(weatherDataCache[station]).forEach((key) => {
-      updateRideability(Number(key));
-    })
+    if (weatherDataCache[station] != null) {
+      Object.keys(weatherDataCache[station]).forEach((key) => {
+        updateRideability(Number(key));
+      });
+    }
     return;
   }
 
   // Don't update data there is no data
-  if (!Object.hasOwn(weatherDataCache[station], yearToUpdate)) {
+  if ((weatherDataCache[station] == null) || (!Object.hasOwn(weatherDataCache[station], yearToUpdate))) {
     return;
   }
 
@@ -402,59 +404,24 @@ function updateRideability(yearToUpdate) {
   updateAverages();
 }
 
-async function setupLocations(extended) {
-  if (!Object.hasOwn(locationListCache, extended)) {
-    locationListCache[extended] = await getWeatherStations(extended);
-  }
-  // Fetch and populate locations
-  var locationDropdown = document.getElementById('location');
-  locationDropdown.innerHTML = ''; // Clear existing list
-  locationListCache[extended].forEach((weatherStation) => {
-    var locationOption = document.createElement('option');
-    locationOption.textContent = weatherStation.name;
-    locationOption.setAttribute('value', weatherStation.id);
-    locationDropdown.append(locationOption);
-  });
-  station = locationDropdown.value;
-  averageAnnualTotals[station] = Array(3).fill(0);
-  averageMonthlyTotals[station] = Array.from({ length: 12 }, () => Array(3).fill(0));
-  weatherDataCache[station] = {};
-  annualTotals[station] = {};
-  monthlyTotals[station] = {};
-
-  var prettyName = locationDropdown.options[locationDropdown.selectedIndex].text
-    .split(',')[0]
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    + ', '
-    + locationDropdown.options[locationDropdown.selectedIndex].text
-    .split(',')[1]
-    .slice(1,3);
-  document.getElementById("averageAnnualTotalLabel").textContent = `average rideable days a year in ${prettyName}`;
-}
-
 const color = ['DarkGreen', 'DarkGoldenRod', 'DarkRed'];
 var sliderValues = {}; // Current values of each input slider
-var locationListCache = {}; // Cache the two versions of the location list
 var weatherDataCache = {}; // Save data from NOAA to avoid excess requests
 var annualTotals = {}; // Sum of how many days are Green, Yellow, and Red respectively
 var monthlyTotals = {}; // Sums broken down by month
 var averageAnnualTotals = {}; // Average of annualTotals across all years
 var averageMonthlyTotals = {}; // Average of monthlyTotals across all years
-var station = 'GHCND:USW00014922'; // Default to Minneapolis, MN
-var year = 2025;
+var station = ''; // Current selected location ID
+var year = new Date().getFullYear() - 1; // Current selected year
 
-async function init() {
-  await setupLocations('false');
-
+function init() {
   // Initialize functionality
   setupSlider('minEasyTemp', 0, 70, 32, -Infinity, '°F', 0);
   setupSlider('minAbsTemp', -32, 38, 0, -Infinity, '°F', 0);
   setupSlider('maxTemp', 70, 120, 90, Infinity, '°F', 0);
   setupSlider('maxRain', 0, 1, 0.2, Infinity, ' in', 2);
   setupSlider('maxSnow', 0, 12, 2, Infinity, ' in', 1);
+  clearAverageSummary();
   changeYear(year);
 
   document.getElementById("yearDec").onclick = function () {
@@ -471,31 +438,46 @@ async function init() {
     }
   }
 
-  document.getElementById("extend").addEventListener('change', async (event) => {
-    if (event.target.checked) {
-      await setupLocations('true');
-    } else {
-      await setupLocations('false');
-    }
-  });
+  document.getElementById("fetchStations").onclick = async function () {
+    document.body.classList.add('loading');
+    var extend = document.getElementById("extend").checked;
+    var locationList = await getWeatherStations(extend ? 'true' : 'false');
+
+    // Fetch and populate locations
+    var locationDropdown = document.getElementById('location');
+    locationDropdown.innerHTML = '<option selected disabled hidden>Select Location</option>'; // Clear existing list
+    locationList.forEach((weatherStation) => {
+      var locationOption = document.createElement('option');
+      locationOption.textContent = weatherStation.name;
+      locationOption.setAttribute('value', weatherStation.id);
+      locationDropdown.append(locationOption);
+    });
+    station = ''; // Reset selection location
+    document.getElementById("averageAnnualTotalLabel").textContent = 'average rideable days a year in';
+    clearAverageSummary();
+    changeYear(year);
+    document.body.classList.remove('loading');
+  };
 
   document.getElementById("fetchData").onclick = async function () {
-    if (!Object.hasOwn(weatherDataCache[station], year)) {
-      // Only request from NOAA if data is not cached
-      weatherDataCache[station][year] = await getWeatherData(station, year);
+    if (station) {
+      if ((weatherDataCache[station] == null) || (!Object.hasOwn(weatherDataCache[station], year))) {
+        // Only request from NOAA if data is not cached
+        weatherDataCache[station][year] = await getWeatherData(station, year);
 
-      // Adjust low temps to "morning" temps
-      Object.keys(weatherDataCache[station][year]).forEach((date) => {
-        var low = weatherDataCache[station][year][date]['TMIN'];
-        var high = weatherDataCache[station][year][date]['TMAX'];
-        if ((low != null) && (high != null)) {
-          weatherDataCache[station][year][date]['TMIN'] = Math.round(low + ((high-low)/4));
-        }
-      });
+        // Adjust low temps to "morning" temps
+        Object.keys(weatherDataCache[station][year]).forEach((date) => {
+          var low = weatherDataCache[station][year][date]['TMIN'];
+          var high = weatherDataCache[station][year][date]['TMAX'];
+          if ((low != null) && (high != null)) {
+            weatherDataCache[station][year][date]['TMIN'] = Math.round(low + ((high-low)/4));
+          }
+        });
 
-      updateRideability(year);
+        updateRideability(year);
+      }
     }
-  }
+    }
 
   for (let i=0; i<12; i++) {
     var averageMonthContainer = document.getElementById(`averageMonth${i}container`);

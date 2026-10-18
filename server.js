@@ -67,7 +67,6 @@ async function getWeatherStations(extended) {
     coverage = data.results[data.results.length-1].datacoverage;
   } while (coverage === 1);
 
-  console.log(`${outputJSON.length} stations found`);
   outputJSON.sort((a,b) => a.name.localeCompare(b.name));
 
   return outputJSON;

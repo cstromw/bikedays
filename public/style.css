@@ -1,3 +1,7 @@
+body.loading, body.loading * {
+    cursor: wait !important;
+}
+
 .year {
     width: 800px;
     display: flex;
