@@ -1,6 +1,6 @@
-async function getWeatherStations(extended) {
+async function getLocations(name) {
   try {
-    const response = await fetch(`http://localhost:3001/get-weather-stations?extended=${extended}`);
+    const response = await fetch(`http://localhost:3001/get-locations?name=${name}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -13,9 +13,14 @@ async function getWeatherStations(extended) {
   }
 }
 
-async function getWeatherData(station, year) {
+async function getWeatherData(lat, long, imperial) {
   try {
-    const response = await fetch(`http://localhost:3001/get-weather-data?station=${station}&year=${year}`);
+    const params = new URLSearchParams({
+      lat: lat,
+      long: long,
+      imperial: imperial
+    });
+    const response = await fetch(`http://localhost:3001/get-weather-data?${params}`);
     
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -29,14 +34,25 @@ async function getWeatherData(station, year) {
 }
 
 // Connect functionality of input sliders and displays
-function setupSlider(sliderName, lowerBound, upperBound, defautValue, limitValue, unit, precision) {
+function setupSlider(sliderName, lowerBound, upperBound, step, limitValue, unit, precision) {
   var sliderInput = document.getElementById(`${sliderName}In`);
   var sliderOutput = document.getElementById(`${sliderName}Out`);
 
   sliderInput.min = lowerBound;
   sliderInput.max = upperBound;
-  sliderInput.value = defautValue;
-  sliderValues[sliderName] = defautValue;
+  sliderInput.step = step;
+  sliderInput.value = sliderValues[sliderName];
+  sliderOutput.innerHTML = sliderValues[sliderName].toFixed(precision) + unit;
+  
+  // If current value is Inf or -Inf, replace with boundary value
+  if (sliderValues[sliderName] < lowerBound) {
+    sliderInput.value = lowerBound;
+    sliderOutput.innerHTML = 'No limit';
+  }
+  if (sliderValues[sliderName] > upperBound) {
+    sliderInput.value = upperBound;
+    sliderOutput.innerHTML = 'No limit';
+  }
 
   sliderInput.oninput = function () {
     sliderValues[sliderName] = Number(this.value);
@@ -50,7 +66,7 @@ function setupSlider(sliderName, lowerBound, upperBound, defautValue, limitValue
     }
 
     // Update calendar display
-    updateRideability('all');
+    updateRideability();
   }
 }
 
@@ -202,34 +218,34 @@ function changeYear(year) {
   // Clear year summary
   clearAnnualSummary();
 
-  updateRideability(year);
+  updateRideability();
 }
 
 function updateAverages() {
   // Clear totals
   for (let i=0; i<3; i++) {
-    averageAnnualTotals[station][i] = 0;
+    averageAnnualTotals[currentLocation.id][i] = 0;
   }
   for (let i=0; i<12; i++) {
     for (let j=0; j<3; j++) {
-      averageMonthlyTotals[station][i][j] = 0;
+      averageMonthlyTotals[currentLocation.id][i][j] = 0;
     }
   }
 
   // Accumulate over each year
   var annualYearCount = 0;
-  Object.values(annualTotals[station]).forEach((totals) => {
+  Object.values(annualTotals[currentLocation.id]).forEach((totals) => {
     for (let i=0; i<3; i++) {
-      averageAnnualTotals[station][i] += totals[i];
+      averageAnnualTotals[currentLocation.id][i] += totals[i];
     }
     annualYearCount += 1;
   });
 
   var monthlyYearCount = 0;
-  Object.values(monthlyTotals[station]).forEach((totals) => {
+  Object.values(monthlyTotals[currentLocation.id]).forEach((totals) => {
     for (let i=0; i<12; i++) {
       for (let j=0; j<3; j++) {
-        averageMonthlyTotals[station][i][j] += totals[i][j];
+        averageMonthlyTotals[currentLocation.id][i][j] += totals[i][j];
       }
     }
     monthlyYearCount += 1;
@@ -237,32 +253,32 @@ function updateAverages() {
 
   // Divide by number of years
   for (let i=0; i<3; i++) {
-    averageAnnualTotals[station][i] = averageAnnualTotals[station][i]/annualYearCount;
+    averageAnnualTotals[currentLocation.id][i] = averageAnnualTotals[currentLocation.id][i]/annualYearCount;
   }
   for (let i=0; i<12; i++) {
     for (let j=0; j<3; j++) {
-      averageMonthlyTotals[station][i][j] = averageMonthlyTotals[station][i][j]/monthlyYearCount;
+      averageMonthlyTotals[currentLocation.id][i][j] = averageMonthlyTotals[currentLocation.id][i][j]/monthlyYearCount;
     }
   }
 
   // Display annual overview
-  document.getElementById("averageAnnualTotal").textContent = Math.round(averageAnnualTotals[station][0]) + Math.round(averageAnnualTotals[station][1]);
-  document.getElementById("averageAnnualTotal0").textContent = `${Math.round(averageAnnualTotals[station][0])} easily bike-rideable`;
-  document.getElementById("averageAnnualTotal1").textContent = `${Math.round(averageAnnualTotals[station][1])} rideable with some prep`;
-  document.getElementById("averageAnnualTotal2").textContent = `${Math.round(averageAnnualTotals[station][2])} not for me`;
+  document.getElementById("averageAnnualTotal").textContent = Math.round(averageAnnualTotals[currentLocation.id][0]) + Math.round(averageAnnualTotals[currentLocation.id][1]);
+  document.getElementById("averageAnnualTotal0").textContent = `${Math.round(averageAnnualTotals[currentLocation.id][0])} easily bike-rideable`;
+  document.getElementById("averageAnnualTotal1").textContent = `${Math.round(averageAnnualTotals[currentLocation.id][1])} rideable with some prep`;
+  document.getElementById("averageAnnualTotal2").textContent = `${Math.round(averageAnnualTotals[currentLocation.id][2])} not for me`;
 
   // Bar chart math
-  var sum = averageAnnualTotals[station][0] + averageAnnualTotals[station][1] + averageAnnualTotals[station][2];
+  var sum = averageAnnualTotals[currentLocation.id][0] + averageAnnualTotals[currentLocation.id][1] + averageAnnualTotals[currentLocation.id][2];
   if (sum === 0) {
     // Avoid divide by 0
     sum = 1;
   }
-  document.getElementById("averageAnnualBar0").style.width = `${100 * averageAnnualTotals[station][0] / sum}%`;
-  document.getElementById("averageAnnualBar1").style.width = `${100 * averageAnnualTotals[station][1] / sum}%`;
-  document.getElementById("averageAnnualBar2").style.width = `${100 * averageAnnualTotals[station][2] / sum}%`;
+  document.getElementById("averageAnnualBar0").style.width = `${100 * averageAnnualTotals[currentLocation.id][0] / sum}%`;
+  document.getElementById("averageAnnualBar1").style.width = `${100 * averageAnnualTotals[currentLocation.id][1] / sum}%`;
+  document.getElementById("averageAnnualBar2").style.width = `${100 * averageAnnualTotals[currentLocation.id][2] / sum}%`;
 
   // Display monthly overviews
-  averageMonthlyTotals[station].forEach((monthlyTotal, index) => {
+  averageMonthlyTotals[currentLocation.id].forEach((monthlyTotal, index) => {
     // Add colored display to overlay
     document.getElementById(`averageMonth${index}overlay0`).textContent = `${Math.round(monthlyTotal[0])} easily`;
     document.getElementById(`averageMonth${index}overlay1`).textContent = `${Math.round(monthlyTotal[1])} with prep`;
@@ -280,41 +296,34 @@ function updateAverages() {
   });
 }
 
-function updateRideability(yearToUpdate) {
-  // Recurse over all years if requested
-  if (yearToUpdate === 'all') {
-    if (weatherDataCache[station] != null) {
-      Object.keys(weatherDataCache[station]).forEach((key) => {
-        updateRideability(Number(key));
-      });
-    }
-    return;
-  }
-
+function updateRideability() {
   // Don't update data there is no data
-  if ((weatherDataCache[station] == null) || (!Object.hasOwn(weatherDataCache[station], yearToUpdate))) {
+  if ((!Object.hasOwn(currentLocation, 'id')) || (weatherDataCache[units][currentLocation.id] == null)) {
     return;
   }
 
   // Clear totals
-  if (!Object.hasOwn(annualTotals[station], yearToUpdate)) {
-    annualTotals[station][yearToUpdate] = Array(3).fill(0);
-  } else {
-    for (let i=0; i<3; i++) {
-      annualTotals[station][yearToUpdate][i] = 0;
+  for (let yearIdx=startYear; yearIdx<=endYear; yearIdx++) {
+    if (!Object.hasOwn(annualTotals[currentLocation.id], yearIdx)) {
+      annualTotals[currentLocation.id][yearIdx] = Array(3).fill(0);
+    } else {
+      for (let i=0; i<3; i++) {
+        annualTotals[currentLocation.id][yearIdx][i] = 0;
+      }
     }
-  }
-  if (!Object.hasOwn(monthlyTotals[station], yearToUpdate)) {
-    monthlyTotals[station][yearToUpdate] = Array.from({ length: 12 }, () => Array(3).fill(0));
-  } else {
-    for (let i=0; i<12; i++) {
-      for (let j=0; j<3; j++) {
-        monthlyTotals[station][yearToUpdate][i][j] = 0;
+    if (!Object.hasOwn(monthlyTotals[currentLocation.id], yearIdx)) {
+      monthlyTotals[currentLocation.id][yearIdx] = Array.from({ length: 12 }, () => Array(3).fill(0));
+    } else {
+      for (let i=0; i<12; i++) {
+        for (let j=0; j<3; j++) {
+          monthlyTotals[currentLocation.id][yearIdx][i][j] = 0;
+        }
       }
     }
   }
 
-  Object.keys(weatherDataCache[station][yearToUpdate]).forEach((day) => {
+  Object.keys(weatherDataCache[units][currentLocation.id]).forEach((day) => {
+    const yearOfDate = Number(day.slice(0,4));
     // Track comfort level per parameter, assume green to start
     // 0 = Green
     // 1 = Yellow
@@ -324,113 +333,228 @@ function updateRideability(yearToUpdate) {
     var rain = 0;
     var snow = 0;
 
-    if (weatherDataCache[station][yearToUpdate][day].TMIN < sliderValues.minAbsTemp) {
+    if (weatherDataCache[units][currentLocation.id][day].low < sliderValues.minAbsTemp) {
       low = 2;
-    } else if (weatherDataCache[station][yearToUpdate][day].TMIN < sliderValues.minEasyTemp) {
+    } else if (weatherDataCache[units][currentLocation.id][day].low < sliderValues.minEasyTemp) {
       low = 1;
     }
 
-    if (weatherDataCache[station][yearToUpdate][day].TMAX > sliderValues.maxTemp) {
+    if (weatherDataCache[units][currentLocation.id][day].high > sliderValues.maxTemp) {
       high = 2;
     }
 
-    if (weatherDataCache[station][yearToUpdate][day].PRCP > sliderValues.maxRain) {
+    if (weatherDataCache[units][currentLocation.id][day].rain > sliderValues.maxRain) {
       rain = 1;
     }
 
-    if (weatherDataCache[station][yearToUpdate][day].SNOW > sliderValues.maxSnow) {
+    if (weatherDataCache[units][currentLocation.id][day].snow > sliderValues.maxSnow) {
       snow = 2;
     }
 
-    if (yearToUpdate === year) {
+    if (yearOfDate === year) {
       // Add colored display to overlay
-      document.getElementById(`${day}overlayLow`).textContent = `A.M.: ${weatherDataCache[station][yearToUpdate][day].TMIN}°F`;
+      if (units === 'imperial') {
+        document.getElementById(`${day}overlayLow`).textContent = `A.M.: ${weatherDataCache[units][currentLocation.id][day].low}°F`;
+        document.getElementById(`${day}overlayHigh`).textContent = `P.M.: ${weatherDataCache[units][currentLocation.id][day].high}°F`;
+        document.getElementById(`${day}overlayRain`).textContent = `Rain: ${weatherDataCache[units][currentLocation.id][day].rain} in`;
+        document.getElementById(`${day}overlaySnow`).textContent = `Snow: ${weatherDataCache[units][currentLocation.id][day].snow} in`;
+      } else {
+        document.getElementById(`${day}overlayLow`).textContent = `A.M.: ${weatherDataCache[units][currentLocation.id][day].low}°C`;
+        document.getElementById(`${day}overlayHigh`).textContent = `P.M.: ${weatherDataCache[units][currentLocation.id][day].high}°C`;
+        document.getElementById(`${day}overlayRain`).textContent = `Rain: ${weatherDataCache[units][currentLocation.id][day].rain} mm`;
+        document.getElementById(`${day}overlaySnow`).textContent = `Snow: ${weatherDataCache[units][currentLocation.id][day].snow} mm`;
+      }
       document.getElementById(`${day}overlayLow`).style.backgroundColor = color[low];
-      document.getElementById(`${day}overlayHigh`).textContent = `P.M.: ${weatherDataCache[station][yearToUpdate][day].TMAX}°F`;
       document.getElementById(`${day}overlayHigh`).style.backgroundColor = color[high];
-      document.getElementById(`${day}overlayRain`).textContent = `Rain: ${weatherDataCache[station][yearToUpdate][day].PRCP} in`;
       document.getElementById(`${day}overlayRain`).style.backgroundColor = color[rain];
-      document.getElementById(`${day}overlaySnow`).textContent = `Snow: ${weatherDataCache[station][yearToUpdate][day].SNOW} in`;
       document.getElementById(`${day}overlaySnow`).style.backgroundColor = color[snow];
     }
       // Color day itself by worst of the 4
       var label = Math.max(low, high, rain, snow);
 
-    if (yearToUpdate === year) {
+    if (yearOfDate === year) {
       document.getElementById(day).style.backgroundColor = color[label];
     }
 
     // Log totals
-    annualTotals[station][yearToUpdate][label] += 1;
-    monthlyTotals[station][yearToUpdate][Number(day.slice(5, 7)) - 1][label] += 1;
+    annualTotals[currentLocation.id][yearOfDate][label] += 1;
+    monthlyTotals[currentLocation.id][yearOfDate][Number(day.slice(5, 7)) - 1][label] += 1;
   });
 
-  if (yearToUpdate === year) {
-    // Display annual overview
-    document.getElementById("annualTotal").textContent = annualTotals[station][yearToUpdate][0] + annualTotals[station][yearToUpdate][1];
-    document.getElementById("annualTotal0").textContent = `${annualTotals[station][yearToUpdate][0]} easily bike-rideable`;
-    document.getElementById("annualTotal1").textContent = `${annualTotals[station][yearToUpdate][1]} rideable with some prep`;
-    document.getElementById("annualTotal2").textContent = `${annualTotals[station][yearToUpdate][2]} not for me`;
+  // Display annual overview
+  document.getElementById("annualTotal").textContent = annualTotals[currentLocation.id][year][0] + annualTotals[currentLocation.id][year][1];
+  document.getElementById("annualTotal0").textContent = `${annualTotals[currentLocation.id][year][0]} easily bike-rideable`;
+  document.getElementById("annualTotal1").textContent = `${annualTotals[currentLocation.id][year][1]} rideable with some prep`;
+  document.getElementById("annualTotal2").textContent = `${annualTotals[currentLocation.id][year][2]} not for me`;
+
+  // Bar chart math
+  var sum = annualTotals[currentLocation.id][year][0] + annualTotals[currentLocation.id][year][1] + annualTotals[currentLocation.id][year][2];
+  if (sum === 0) {
+    // Avoid divide by 0
+    sum = 1;
+  }
+  document.getElementById("annualBar0").style.width = `${100 * annualTotals[currentLocation.id][year][0] / sum}%`;
+  document.getElementById("annualBar1").style.width = `${100 * annualTotals[currentLocation.id][year][1] / sum}%`;
+  document.getElementById("annualBar2").style.width = `${100 * annualTotals[currentLocation.id][year][2] / sum}%`;
+
+  // Display monthly overviews
+  monthlyTotals[currentLocation.id][year].forEach((monthlyTotal, index) => {
+    // Add colored display to overlay
+    document.getElementById(`month${index}overlay0`).textContent = `${monthlyTotal[0]} easily`;
+    document.getElementById(`month${index}overlay1`).textContent = `${monthlyTotal[1]} with prep`;
+    document.getElementById(`month${index}overlay2`).textContent = `${monthlyTotal[2]} not for me`;
 
     // Bar chart math
-    var sum = annualTotals[station][yearToUpdate][0] + annualTotals[station][yearToUpdate][1] + annualTotals[station][yearToUpdate][2];
+    sum = monthlyTotal[0] + monthlyTotal[1] + monthlyTotal[2];
     if (sum === 0) {
       // Avoid divide by 0
       sum = 1;
     }
-    document.getElementById("annualBar0").style.width = `${100 * annualTotals[station][yearToUpdate][0] / sum}%`;
-    document.getElementById("annualBar1").style.width = `${100 * annualTotals[station][yearToUpdate][1] / sum}%`;
-    document.getElementById("annualBar2").style.width = `${100 * annualTotals[station][yearToUpdate][2] / sum}%`;
-
-    // Display monthly overviews
-    monthlyTotals[station][yearToUpdate].forEach((monthlyTotal, index) => {
-      // Add colored display to overlay
-      document.getElementById(`month${index}overlay0`).textContent = `${monthlyTotal[0]} easily`;
-      document.getElementById(`month${index}overlay1`).textContent = `${monthlyTotal[1]} with prep`;
-      document.getElementById(`month${index}overlay2`).textContent = `${monthlyTotal[2]} not for me`;
-
-      // Bar chart math
-      sum = monthlyTotal[0] + monthlyTotal[1] + monthlyTotal[2];
-      if (sum === 0) {
-        // Avoid divide by 0
-        sum = 1;
-      }
-      document.getElementById(`month${index}Bar0`).style.height = `${100 * monthlyTotal[0] / sum}%`;
-      document.getElementById(`month${index}Bar1`).style.height = `${100 * monthlyTotal[1] / sum}%`;
-      document.getElementById(`month${index}Bar2`).style.height = `${100 * monthlyTotal[2] / sum}%`;
-    });
-  }
+    document.getElementById(`month${index}Bar0`).style.height = `${100 * monthlyTotal[0] / sum}%`;
+    document.getElementById(`month${index}Bar1`).style.height = `${100 * monthlyTotal[1] / sum}%`;
+    document.getElementById(`month${index}Bar2`).style.height = `${100 * monthlyTotal[2] / sum}%`;
+  });
 
   updateAverages();
 }
 
+async function fetchData(lat, long) {
+  if (weatherDataCache[units][currentLocation.id] == null) {
+    // Only request from server if data is not cached
+    weatherDataCache[units][currentLocation.id] = await getWeatherData(lat, long, (units === 'imperial' ? true : false));
+
+    // Adjust low temps to "morning" temps
+    Object.keys(weatherDataCache[units][currentLocation.id]).forEach((date) => {
+      var low = weatherDataCache[units][currentLocation.id][date]['low'];
+      var high = weatherDataCache[units][currentLocation.id][date]['high'];
+      if ((low != null) && (high != null)) {
+        weatherDataCache[units][currentLocation.id][date]['low'] = Math.round(low + ((high-low)/4));
+      }
+    });
+
+    updateRideability();
+  }
+}
+
+async function updateLocation() {
+  if (Object.hasOwn(currentLocation, 'id')) {
+    document.getElementById("averageAnnualTotalLabel").textContent = `average rideable days a year in ${currentLocation.name}, ${currentLocation.region}, ${currentLocation.country}`;
+    if (!Object.hasOwn(weatherDataCache[units], currentLocation.id)) {
+      // No data cached, initialize totals and fetch data
+      averageAnnualTotals[currentLocation.id] = Array(3).fill(0);
+      averageMonthlyTotals[currentLocation.id] = Array.from({ length: 12 }, () => Array(3).fill(0));
+      annualTotals[currentLocation.id] = {};
+      monthlyTotals[currentLocation.id] = {};
+
+      fetchData(currentLocation.lat, currentLocation.long);
+    } else {
+      // Data cached, display it
+      updateRideability();
+    }
+  }
+  // No matter what, refresh year view
+  changeYear(year);
+}
+
+async function showLocations(name) {
+  var locationList = await getLocations(name);
+  var suggestions = document.getElementById('suggestions');
+  suggestions.innerHTML = ''; // Clear existing list
+  if (locationList.length > 0) {
+    locationList.forEach((locationOption) => {
+      var listItem = document.createElement('li');
+      listItem.textContent = `${locationOption.name}, ${locationOption.region}, ${locationOption.country} (${locationOption.lat}, ${locationOption.long})`;
+      listItem.addEventListener('click', () => {
+        currentLocation = { ...locationOption };
+        updateLocation();
+        suggestions.style.display = 'none';
+      });
+
+      suggestions.appendChild(listItem);
+    });
+    suggestions.style.display = 'block';
+  }
+}
+
+function changeUnits() {
+  if (units === 'imperial') {
+    setupSlider('minEasyTemp', -4, 68, 1, -Infinity, '°F', 0);
+    setupSlider('minAbsTemp', -31, 41, 1, -Infinity, '°F', 0);
+    setupSlider('maxTemp', 68, 122, 1, Infinity, '°F', 0);
+    setupSlider('maxRain', 0, 1, 0.05, Infinity, ' in', 2);
+    setupSlider('maxSnow', 0, 12, 0.2, Infinity, ' in', 1);
+  } else {
+    setupSlider('minEasyTemp', -20, 20, 1, -Infinity, '°C', 0);
+    setupSlider('minAbsTemp', -35, 5, 1, -Infinity, '°C', 0);
+    setupSlider('maxTemp', 20, 50, 1, Infinity, '°C', 0);
+    setupSlider('maxRain', 0, 25, 1, Infinity, ' mm', 0);
+    setupSlider('maxSnow', 0, 305, 5, Infinity, ' mm', 0);
+  }
+  // Refresh all data on page to use new units
+  updateLocation();
+}
+
 const color = ['DarkGreen', 'DarkGoldenRod', 'DarkRed'];
-var sliderValues = {}; // Current values of each input slider
-var weatherDataCache = {}; // Save data from NOAA to avoid excess requests
+var sliderValues = { // Current values of each input slider
+  minEasyTemp: 0,  // Default   0 degrees C / 32 degrees F
+  minAbsTemp: -15, // Default -15 degrees C /  5 degrees F
+  maxTemp: 30,     // Default  30 degrees C / 86 degrees F
+  maxRain: 5,      // Default  5 mm / 0.20 in
+  maxSnow: 50      // Default 50 mm /  2.0 in
+}; 
+var units = 'metric';
+
+// Save data from server to avoid excess requests. Cache for each unit type to avoid rounding errors
+var weatherDataCache = {metric: {}, imperial: {}}; 
+
 var annualTotals = {}; // Sum of how many days are Green, Yellow, and Red respectively
 var monthlyTotals = {}; // Sums broken down by month
 var averageAnnualTotals = {}; // Average of annualTotals across all years
 var averageMonthlyTotals = {}; // Average of monthlyTotals across all years
-var station = ''; // Current selected location ID
+var currentLocation = {};
+const startYear = new Date().getFullYear() - 10;
+const endYear = new Date().getFullYear() - 1;
 var year = new Date().getFullYear() - 1; // Current selected year
 
 function init() {
   // Initialize functionality
-  setupSlider('minEasyTemp', 0, 70, 32, -Infinity, '°F', 0);
-  setupSlider('minAbsTemp', -32, 38, 0, -Infinity, '°F', 0);
-  setupSlider('maxTemp', 70, 120, 90, Infinity, '°F', 0);
-  setupSlider('maxRain', 0, 1, 0.2, Infinity, ' in', 2);
-  setupSlider('maxSnow', 0, 12, 2, Infinity, ' in', 1);
-  clearAverageSummary();
-  changeYear(year);
+  changeUnits();
 
+  // Metric radio button on click
+  document.getElementById("metric").addEventListener('change', (event) => {
+    if (event.target.checked) {
+      units = 'metric';
+      sliderValues.minEasyTemp = Math.round((sliderValues.minEasyTemp-32)*5/9);
+      sliderValues.minAbsTemp = Math.round((sliderValues.minAbsTemp-32)*5/9);
+      sliderValues.maxTemp = Math.round((sliderValues.maxTemp-32)*5/9);
+      sliderValues.maxRain = Math.round(sliderValues.maxRain*25.4);
+      sliderValues.maxSnow = Math.round(sliderValues.maxSnow*25.4/5)*5;
+      changeUnits();
+    }
+  });
+
+  // Imperial radio button on click
+  document.getElementById("imperial").addEventListener('change', (event) => {
+    if (event.target.checked) {
+      units = 'imperial';
+      sliderValues.minEasyTemp = Math.round(sliderValues.minEasyTemp*9/5 + 32);
+      sliderValues.minAbsTemp = Math.round(sliderValues.minAbsTemp*9/5 + 32);
+      sliderValues.maxTemp = Math.round(sliderValues.maxTemp*9/5 + 32);
+      sliderValues.maxRain = Math.round(20*sliderValues.maxRain/25.4)/20;
+      sliderValues.maxSnow = Math.round(5*sliderValues.maxSnow/25.4)/5;
+      changeUnits();
+    }
+  });
+
+  // Back a year button on click
   document.getElementById("yearDec").onclick = function () {
-    if (year > 2000) {
+    if (year > new Date().getFullYear() - 10) {
       year -= 1;
       changeYear(year);
     }
   }
 
+  // Forward a year button on click
   document.getElementById("yearInc").onclick = function () {
     if (year < new Date().getFullYear() - 1) {
       year += 1;
@@ -438,47 +562,25 @@ function init() {
     }
   }
 
-  document.getElementById("fetchStations").onclick = async function () {
-    document.body.classList.add('loading');
-    var extend = document.getElementById("extend").checked;
-    var locationList = await getWeatherStations(extend ? 'true' : 'false');
+  
+  // Location field on input
+  let typingTimer;
 
-    // Fetch and populate locations
-    var locationDropdown = document.getElementById('location');
-    locationDropdown.innerHTML = '<option selected disabled hidden>Select Location</option>'; // Clear existing list
-    locationList.forEach((weatherStation) => {
-      var locationOption = document.createElement('option');
-      locationOption.textContent = weatherStation.name;
-      locationOption.setAttribute('value', weatherStation.id);
-      locationDropdown.append(locationOption);
-    });
-    station = ''; // Reset selection location
-    document.getElementById("averageAnnualTotalLabel").textContent = 'average rideable days a year in';
-    clearAverageSummary();
-    changeYear(year);
-    document.body.classList.remove('loading');
-  };
+  document.getElementById('search').addEventListener('input', (event) => {
+    clearTimeout(typingTimer);
 
-  document.getElementById("fetchData").onclick = async function () {
-    if (station) {
-      if ((weatherDataCache[station] == null) || (!Object.hasOwn(weatherDataCache[station], year))) {
-        // Only request from NOAA if data is not cached
-        weatherDataCache[station][year] = await getWeatherData(station, year);
-
-        // Adjust low temps to "morning" temps
-        Object.keys(weatherDataCache[station][year]).forEach((date) => {
-          var low = weatherDataCache[station][year][date]['TMIN'];
-          var high = weatherDataCache[station][year][date]['TMAX'];
-          if ((low != null) && (high != null)) {
-            weatherDataCache[station][year][date]['TMIN'] = Math.round(low + ((high-low)/4));
-          }
-        });
-
-        updateRideability(year);
-      }
+    var suggestions = document.getElementById('suggestions');
+    if (event.target.value.length === 0) {
+      suggestions.style.display = 'none';
+    } else {
+      // Start a new 1-second countdown
+      typingTimer = setTimeout(() => {
+        showLocations(event.target.value);
+      }, 500);
     }
-    }
+  });
 
+  // Bar charts on hover
   for (let i=0; i<12; i++) {
     var averageMonthContainer = document.getElementById(`averageMonth${i}container`);
     averageMonthContainer.addEventListener('mouseenter', () => {
@@ -496,33 +598,6 @@ function init() {
       document.getElementById(`month${i}overlay`).classList.remove('visible');
     });
   };
-
-  var locationDropdown = document.getElementById('location');
-  locationDropdown.addEventListener('change', () => {
-    station = locationDropdown.value;
-    var prettyName = locationDropdown.options[locationDropdown.selectedIndex].text
-      .split(',')[0]
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-      + ', '
-      + locationDropdown.options[locationDropdown.selectedIndex].text
-      .split(',')[1]
-      .slice(1,3);
-    document.getElementById("averageAnnualTotalLabel").textContent = `average rideable days a year in ${prettyName}`;
-    if (!Object.hasOwn(weatherDataCache, station)) {
-      averageAnnualTotals[station] = Array(3).fill(0);
-      averageMonthlyTotals[station] = Array.from({ length: 12 }, () => Array(3).fill(0));
-      weatherDataCache[station] = {};
-      annualTotals[station] = {};
-      monthlyTotals[station] = {};
-      clearAverageSummary();
-    } else {
-      updateRideability('all');
-    }
-    changeYear(year);
-  });
 }
 
 init();

@@ -2,127 +2,84 @@ import express from 'express';
 const app = express()
 const port = 3001
 
-// Send API request to noaa.gov for weather data
-async function fetchFromNoaa(endpoint, params) {
-  // Request token at https://www.ncdc.noaa.gov/cdo-web/token
-  const token = 'yourtokenhere';
-  const URL = `https://www.ncei.noaa.gov/cdo-web/api/v2/${endpoint}`;
+// Send API request to open meteo for data
+async function fetchFromOpenMeteo(URL, params) {
+  
   const response = await fetch(`${URL}?${params}`, {
-    method: 'GET',
-    headers: {
-      'token': token
-    },
+    method: 'GET'
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error! Status: ${response.status}`);
+    const errorData = await response.json();
+    throw new Error(`HTTP error! Status: ${response.status}, Data: ${JSON.stringify(errorData)}`);
   }
 
   const data = await response.json();
   return data;
 };
 
-// Returns a list of reliable weather stations (currently ~100 across the US) and their unique IDs
-async function getWeatherStations(extended) {
+// Returns a list of 10 locations matching the search string
+async function getLocations(name) {
+
+  const URL = `https://geocoding-api.open-meteo.com/v1/search`;
   var params = new URLSearchParams({
-    datasetid: 'GHCND',
-    sortfield: 'datacoverage',
-    sortorder: 'desc',
-    limit: '1000',
-    offset: '0'
+    name: name,
+    language: 'en'
   });
-  params.append('datatypeid', 'TMIN');
-  params.append('datatypeid', 'TMAX');
-  params.append('datatypeid', 'PRCP');
-  params.append('datatypeid', 'SNOW');
 
-  // Removing GHCND requirement expands the list from ~100 to ~5000
-  if(extended === 'true') {
-    params.delete('datasetid');
+  const data = await fetchFromOpenMeteo(URL, params);
+
+  if (!Object.hasOwn(data, 'results')) {
+    return [];
+  } else {
+    const locationList = data.results.map(result => ({
+      id: result.id,
+      name: result.name,
+      region: result.admin1,
+      country: result.country,
+      lat: result.latitude,
+      long: result.longitude
+    }));
+
+    return locationList;
   }
-
-  var offset = 0;
-  var coverage = 1;
-  var outputJSON = [];
-  do {
-    const data = await fetchFromNoaa('stations', params);
-    data.results.forEach((result) => {
-      // Log name and ID if data is current
-      // Many stations are historic data only
-      if ((result.datacoverage === 1) && (result.maxdate.slice(0,4) === "2026")){
-        outputJSON.push({name: result.name, id: result.id});
-      }
-    });
-
-    // If out of stations, finish requesting
-    if (data.results.length < 1000) {
-      break;
-    }
-
-    // Set up for another chunk of records
-    offset += 1000;
-    params.set('offset', `${offset}`);
-    
-    // Request another chunk if the end of the list is still 100% data coverage
-    coverage = data.results[data.results.length-1].datacoverage;
-  } while (coverage === 1);
-
-  outputJSON.sort((a,b) => a.name.localeCompare(b.name));
-
-  return outputJSON;
 }
 
-// Returns a list of the following data points, indexed by date:
-// - Daily low temperature in degrees Farenheit, rounded to whole degree
-// - Daily high temperature in degrees Farenheit, rounded to whole degree
-// - Daily rain total in inches, rounded to hundredths of an inch
-// - Daily snow total in inches, rounded to tenths of an inch
-async function getWeatherData(station, year) {
-  const locationParams = {
-    datasetid: 'GHCND',
-    stationid: station,
-    startdate: `${year}-01-01`,
-    enddate: `${year}-12-31`,
-    limit: '1000'
-  };
+// Returns a list of the following data points over the past decade, indexed by date:
+// - Daily low temperature
+// - Daily high temperature
+// - Daily rain total
+// - Daily snow total
+// If imperial == true, converts from degrees Celsius/mm to degrees Fahrenheit/inch
+async function getWeatherData(lat, long, imperial) {
+  const endYear = new Date().getFullYear() - 1;
+  const tempUnit = imperial ? 'fahrenheit' : 'celsius';
+  const prcpUnit = imperial ? 'inch' : 'mm';
 
-  // Temperature minimum and maximum datasets
-  var tempParams = new URLSearchParams(locationParams);
-  tempParams.append('datatypeid', 'TMIN');
-  tempParams.append('datatypeid', 'TMAX');
+  const URL = `https://archive-api.open-meteo.com/v1/archive`;
+  const params = new URLSearchParams({
+    latitude: lat,
+    longitude: long,
+    start_date: `${endYear-9}-01-01`,
+    end_date: `${endYear}-12-31`,
+    daily: 'rain_sum,snowfall_sum,temperature_2m_max,temperature_2m_min',
+    timezone: 'auto',
+    temperature_unit: tempUnit,
+    precipitation_unit: prcpUnit
+  });
 
-  // Precipitation and snow datasets
-  var prcpParams = new URLSearchParams(locationParams);
-  prcpParams.append('datatypeid', 'PRCP');
-  prcpParams.append('datatypeid', 'SNOW');
+  const data = await fetchFromOpenMeteo(URL, params);
 
-  // Split in two requests to fit under 1000 record limit
-  const tempData = await fetchFromNoaa('data', tempParams);
-  const prcpData = await fetchFromNoaa('data', prcpParams);
-
-  var weatherData = {};
-  // Reformat data into one date-indexed structure
-  if (tempData != null) {
-    tempData.results.forEach((result) => {
-      var date = result.date.split("T")[0];
-      weatherData[date] ??= {};
-      // Temps given in tenths of a degree Celsius, convert to Farenheit
-      weatherData[date][result.datatype] = Math.round(result.value * 9 / 50 + 32);
-    });
-  }
-  if (prcpData != null) {
-  prcpData.results.forEach((result) => {
-      var date = result.date.split("T")[0];
-      weatherData[date] ??= {};
-      if (result.datatype === 'PRCP') {
-        // Rain given in tenths of a millimeter, convert to inches to the nearest 100th
-        weatherData[date][result.datatype] = Math.round((result.value / 254) * 100) / 100;
-      } else {
-        // Snow given in millimeters, convert to inches to the nearest 10th
-        weatherData[date][result.datatype] = Math.round((result.value / 25.4) * 10) / 10
-      }
-    });
-  }
+  const rainPrecision = imperial ? 100 : 10;
+  const snowPrecision = imperial ? 10 : 1;
+  const weatherData = Object.fromEntries(
+    data.daily.time.map((day, index) => [day, {
+      high: Math.round(data.daily.temperature_2m_max[index]),
+      low: Math.round(data.daily.temperature_2m_min[index]),
+      rain: Math.round(rainPrecision*data.daily.rain_sum[index])/rainPrecision,
+      snow: Math.round(snowPrecision*data.daily.snowfall_sum[index])/snowPrecision
+    }])
+  );
 
   return weatherData;
 }
@@ -134,20 +91,19 @@ var options = {
 app.use('/', express.static('public', options));
 
 app.get('/get-weather-data', async (req, res) => {
-  var station = req.query['station'];
-  var year = req.query['year'];
-  var data = await getWeatherData(station, Number(year));
+  var lat = req.query['lat'];
+  var long = req.query['long'];
+  var imperial = (req.query['imperial'] === 'true') ? true : false;
+  var data = await getWeatherData(lat, long, imperial);
   res.send(data);
 })
 
-app.get('/get-weather-stations', async (req, res) => {
-  var extended = req.query['extended'];
-  var data = await getWeatherStations(extended);
+app.get('/get-locations', async (req, res) => {
+  var name = req.query['name'];
+  var data = await getLocations(name);
   res.send(data);
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`bikedays app listening on port ${port}`)
 })
-
-

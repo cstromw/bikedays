@@ -9,155 +9,46 @@
 
     <h1>Bike-Rideable Days</h1>
 
-    <div class="dropdown">
-    <label for="location">Select your location:</label>
-    <select name="location" id="location">
-        <option selected disabled hidden>Select Location</option>
-        <option value="GHCND:USW00014895">AKRON CANTON AIRPORT, OH US</option>
-        <option value="GHCND:USW00023061">ALAMOSA BERGMAN FIELD, CO US</option>
-        <option value="GHCND:USW00014735">ALBANY INTERNATIONAL AIRPORT, NY US</option>
-        <option value="GHCND:USW00014737">ALLENTOWN LEHIGH VALLEY INTERNATIONAL AIRPORT, PA US</option>
-        <option value="GHCND:USW00013870">ALMA BACON CO AIRPORT, GA US</option>
-        <option value="GHCND:USC00200228">ANN ARBOR SE, MI US</option>
-        <option value="GHCND:USW00013874">ATLANTA HARTSFIELD JACKSON INTERNATIONAL AIRPORT, GA US</option>
-        <option value="GHCND:USW00013958">AUSTIN CAMP MABRY, TX US</option>
-        <option value="GHCND:USW00023155">BAKERSFIELD AIRPORT, CA US</option>
-        <option value="GHCND:USW00003872">BECKLEY RALEIGH CO AIRPORT, WV US</option>
-        <option value="GHCND:USC00200758">BEULAH 7 SSW, MI US</option>
-        <option value="GHCND:USW00004725">BINGHAMTON GREATER AP, NY US</option>
-        <option value="GHCND:USW00013876">BIRMINGHAM AIRPORT, AL US</option>
-        <option value="GHCND:USC00190736">BLUE HILL COOP, MA US</option>
-        <option value="GHCND:USW00014753">BLUE HILL LCD, MA US</option>
-        <option value="GHCND:USW00014739">BOSTON LOGAN INTERNATIONAL AIRPORT, MA US</option>
-        <option value="GHCND:USC00420819">BOUNTIFUL BENCH, UT US</option>
-        <option value="GHCND:USW00013877">BRISTOL AIRPORT, TN US</option>
-        <option value="GHCND:USC00311248">BURNSVILLE AG, NC US</option>
-        <option value="GHCND:USC00363226">CASHTOWN 1 S, PA US</option>
-        <option value="GHCND:USW00013880">CHARLESTON INTL. AIRPORT, SC US</option>
-        <option value="GHCND:USW00013866">CHARLESTON WEST VIRGINIA INTERNATIONAL YEAGER AIRPORT, WV US</option>
-        <option value="GHCND:USC00301388">CHASES LAKE, NY US</option>
-        <option value="GHCND:USW00013882">CHATTANOOGA AIRPORT, TN US</option>
-        <option value="GHCND:USW00014991">CHIPPEWA VALLEY REGIONAL AIRPORT, WI US</option>
-        <option value="GHCND:USW00014820">CLEVELAND HOPKINS INTERNATIONAL AIRPORT, OH US</option>
-        <option value="GHCND:USW00093842">COLUMBUS METROPOLITAN AIRPORT, GA US</option>
-        <option value="GHCND:USW00012834">DAYTONA BEACH INTERNATIONAL AIRPORT, FL US</option>
-        <option value="GHCND:USW00014913">DULUTH INTERNATIONAL AIRPORT, MN US</option>
-        <option value="GHCND:USC00262570">ELKO NWS OFFICE, NV US</option>
-        <option value="GHCND:USW00024221">EUGENE MAHLON SWEET FIELD, OR US</option>
-        <option value="GHCND:USW00024213">EUREKA WEATHER FORECAST OFFICE WOODLEY ISLAND, CA US</option>
-        <option value="GHCND:USW00026411">FAIRBANKS INTERNATIONAL AIRPORT, AK US</option>
-        <option value="GHCND:USC00313072">FLAT SPRINGS 1 E, NC US</option>
-        <option value="GHCND:USW00014826">FLINT FCWOS, MI US</option>
-        <option value="GHCND:USW00013964">FORT SMITH REGIONAL AIRPORT, AR US</option>
-        <option value="GHCND:USW00014768">FREDERICK DOUGLASS GREATER ROCHESTER INTERNATIONAL AIRPORT, NY US</option>
-        <option value="GHCND:USC00123207">GARRETT 1 S, IN US</option>
-        <option value="GHCND:USW00014935">GRAND ISLAND CENTRAL NE REGIONAL AIRPORT, NE US</option>
-        <option value="GHCND:USC00053486">GRAND JUNCTION WEATHER FORECAST OFFICE, CO US</option>
-        <option value="GHCND:USW00094860">GRAND RAPIDS GERALD R FORD INTERNATIONAL AIRPORT, MI US</option>
-        <option value="GHCND:USW00024143">GREAT FALLS AIRPORT, MT US</option>
-        <option value="GHCND:USW00014898">GREEN BAY A S INTERNATIONAL AIRPORT, WI US</option>
-        <option value="GHCND:USW00013723">GREENSBORO PIEDMONT TRIAD INTERNATIONAL AIRPORT, NC US</option>
-        <option value="GHCND:USW00003870">GRNVL SPART INTERNATIONAL AIRPORT, SC US</option>
-        <option value="GHCND:USW00094814">HOUGHTON LAKE ROSCOMMON CO AIRPORT, MI US</option>
-        <option value="GHCND:USW00012960">HOUSTON INTERCONTINENTAL AIRPORT, TX US</option>
-        <option value="GHCND:USW00003860">HUNTINGTON TRI STATE AIRPORT, WV US</option>
-        <option value="GHCND:USW00003856">HUNTSVILLE INTNL AIRPORT, AL US</option>
-        <option value="GHCND:USW00003889">JACKSON JULIAN CARROLL AIRPORT, KY US</option>
-        <option value="GHCND:USC00384460">JEFFERSON 0.1NW, SC US</option>
-        <option value="GHCND:USW00003947">KANSAS CITY INTERNATIONAL AIRPORT, MO US</option>
-        <option value="GHCND:USC00144199">KANSAS CITY WEST, KS US</option>
-        <option value="GHCND:USW00014732">LAGUARDIA AIRPORT, NY US</option>
-        <option value="GHCND:USC00054736">LAKE CITY 1 NNE, CO US</option>
-        <option value="GHCND:USC00154958">LOUISVILLE WEATHER FORECAST OFFICE, KY US</option>
-        <option value="GHCND:USW00013733">LYNCHBURG REGIONAL AIRPORT, VA US</option>
-        <option value="GHCND:USW00014837">MADISON DANE CO REGIONAL AIRPORT, WI US</option>
-        <option value="GHCND:USW00024225">MEDFORD INTERNATIONAL AIRPORT, OR US</option>
-        <option value="GHCND:USW00012838">MELBOURNE INTERNATIONAL AIRPORT, FL US</option>
-        <option value="GHCND:USW00013893">MEMPHIS INTERNATIONAL AIRPORT, TN US</option>
-        <option value="GHCND:USW00012839">MIAMI INTERNATIONAL AIRPORT, FL US</option>
-        <option value="GHCND:USW00023023">MIDLAND INTERNATIONAL AIRPORT, TX US</option>
-        <option value="GHCND:USC00185934">MILLERS 4 NE, MD US</option>
-        <option value="GHCND:USW00014839">MILWAUKEE MITCHELL AIRPORT, WI US</option>
-        <option value="GHCND:USW00014922">MINNEAPOLIS ST. PAUL INTERNATIONAL AIRPORT, MN US</option>
-        <option value="GHCND:USW00024153">MISSOULA INTERNATIONAL AIRPORT, MT US</option>
-        <option value="GHCND:USW00013894">MOBILE REGIONAL AIRPORT, AL US</option>
-        <option value="GHCND:USW00014923">MOLINE QUAD CITY INTERNATIONAL AIRPORT, IL US</option>
-        <option value="GHCND:USW00013897">NASHVILLE INTERNATIONAL AIRPORT, TN US</option>
-        <option value="GHCND:USC00366238">NEW HOLLAND 2 SE, PA US</option>
-        <option value="GHCND:USW00013737">NORFOLK INTERNATIONAL AIRPORT, VA US</option>
-        <option value="GHCND:USW00014941">NORFOLK KARL STEFAN MEMORIAL AIRPORT, NE US</option>
-        <option value="GHCND:USW00003952">NORTH LITTLE ROCK WEATHER FORECAST OFFICE, AR US</option>
-        <option value="GHCND:USW00024023">NORTH PLATTE REGIONAL AIRPORT, NE US</option>
-        <option value="GHCND:USC00276365">NORTHUMBERLAND, NH US</option>
-        <option value="GHCND:USW00094728">NY CITY CENTRAL PARK, NY US</option>
-        <option value="GHCND:USC00346620">OKARCHE, OK US</option>
-        <option value="GHCND:USW00013899">PENSACOLA REGIONAL AIRPORT, FL US</option>
-        <option value="GHCND:USC00206510">PETOSKEY NCMC, MI US</option>
-        <option value="GHCND:USW00024156">POCATELLO REGIONAL AIRPORT, ID US</option>
-        <option value="GHCND:USW00014764">PORTLAND JETPORT, ME US</option>
-        <option value="GHCND:USW00013722">RALEIGH DURHAM INTERNATIONAL AIRPORT, NC US</option>
-        <option value="GHCND:USW00024257">REDDING AIRPORT, CA US</option>
-        <option value="GHCND:USW00023185">RENO AIRPORT, NV US</option>
-        <option value="GHCND:USW00013741">ROANOKE BLACKSBURG REGIONAL AIRPORT, VA US</option>
-        <option value="GHCND:USW00094822">ROCKFORD GREATER ROCKFORD AIRPORT, IL US</option>
-        <option value="GHCND:USC00298127">SANTA TERESA AIRPORT, NM US</option>
-        <option value="GHCND:USW00014847">SAULT STE MARIE SANDERSON FIELD, MI US</option>
-        <option value="GHCND:USW00003822">SAVANNAH HILTON HEAD INTERNATIONAL AIRPORT, GA US</option>
-        <option value="GHCND:USW00024233">SEATTLE TACOMA AIRPORT, WA US</option>
-        <option value="GHCND:USW00024029">SHERIDAN AIRPORT, WY US</option>
-        <option value="GHCND:USW00013957">SHREVEPORT AIRPORT, LA US</option>
-        <option value="GHCND:USW00014943">SIOUX CITY AIRPORT, IA US</option>
-        <option value="GHCND:USW00013995">SPRINGFIELD WEATHER SERVICE OFFICE AIRPORT, MO US</option>
-        <option value="GHCND:USW00014771">SYRACUSE HANCOCK INTERNATIONAL AIRPORT, NY US</option>
-        <option value="GHCND:USW00012842">TAMPA INTERNATIONAL AIRPORT, FL US</option>
-        <option value="GHCND:USW00094830">TOLEDO EXPRESS AIRPORT, OH US</option>
-        <option value="GHCND:USW00013996">TOPEKA ASOS, KS US</option>
-        <option value="GHCND:USC00178792">TOPSFIELD 2, ME US</option>
-        <option value="GHCND:USC00208245">TRAVERSE CITY 4.7ESE, MI US</option>
-        <option value="GHCND:USW00024032">VALENTINE MILLER FIELD AIRPORT, NE US</option>
-        <option value="GHCND:USW00013959">WACO REGIONAL AIRPORT, TX US</option>
-        <option value="GHCND:USC00268976">WELLINGTON, NV US</option>
-        <option value="GHCND:USW00003928">WICHITA DWIGHT D. EISENHOWER NATIONAL AIRPORT, KS US</option>
-        </select>
-    </div>
-
-    <div class="toggle">
-        <input type="checkbox" id="extend" name="extend" value="no">
-        <label for="extend">Use extended location list (VERY long, takes ~30 seconds to update)</label>
-    </div>
-
-    <div class="update">
-        <button id="fetchStations" type="button">Update location list</button>
+    <div class="search">
+        <input type="text" id="search", placeholder="Search locations...">
+        <ul id="suggestions"></ul>
     </div>
 
     <div class="slider">
     <label for="minEasyTempIn">What's the lowest temperature you like for an easy morning ride?</label>
-    <input type="range" id="minEasyTempIn" min="0" max="70" value="32">
-    <output id="minEasyTempOut">32°F</output>
+    <input type="range" id="minEasyTempIn" min="-20" max="20" value="0">
+    <output id="minEasyTempOut">0°C</output>
     </div>
 
     <div class="slider">
     <label for="minAbsTempIn">What's the coldest morning temperature in which you'll ride?</label>
-    <input type="range" id="minAbsTempIn" min="-32" max="38" value="0">
-    <output id="minAbsTempOut">0°F</output>
+    <input type="range" id="minAbsTempIn" min="-35" max="5" value="-15">
+    <output id="minAbsTempOut">-15°C</output>
     </div>
 
     <div class="slider">
     <label for="maxTempIn">What's the hottest daytime temperature you'll ride in?</label>
-    <input type="range" id="maxTempIn" min="70" max="120" value="90">
-    <output id="maxTempOut">90°F</output>
+    <input type="range" id="maxTempIn" min="20" max="50" value="30">
+    <output id="maxTempOut">30°C</output>
     </div>
 
     <div class="slider">
     <label for="maxRainIn">What's your rain limit?</label>
-    <input type="range" id="maxRainIn" min="0" max="1" step="0.05" value="0.2">
-    <output id="maxRainOut">0.20 in</output>
+    <input type="range" id="maxRainIn" min="0" max="25" value="5">
+    <output id="maxRainOut">5 mm</output>
     </div>
 
     <div class="slider">
     <label for="maxSnowIn">What's your snow limit?</label>
-    <input type="range" id="maxSnowIn" min="0" max="12" step="0.2" value="2">
-    <output id="maxSnowOut">2.0 in</output>
+    <input type="range" id="maxSnowIn" min="0" max="305" step="5" value="50">
+    <output id="maxSnowOut">50 mm</output>
+    </div>
+
+    <div class="units">
+        <input type="radio" id="metric" name="units" value="metric" checked>
+        <label for="metric">Metric (°C, mm)</label>
+        <input type="radio" id="imperial" name="units" value="imperial">
+        <label for="imperial">Imperial (°F, in)</label>
     </div>
 
     <div class="summary">
@@ -355,10 +246,6 @@
         <button id="yearDec" type="button">&lt</button>
         <h2 id="year">2025</h2>
         <button id="yearInc" type="button">&gt</button>
-    </div>
-
-    <div class="year">
-        <button id="fetchData" type="button">Fetch Data from NOAA</button>
     </div>
 
     <div id="calendar" class="calendar">
