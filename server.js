@@ -5,7 +5,7 @@ const port = 3001
 // Send API request to noaa.gov for weather data
 async function fetchFromNoaa(endpoint, params) {
   // Request token at https://www.ncdc.noaa.gov/cdo-web/token
-  const token = 'youtokenhere';
+  const token = 'yourtokenhere';
   const URL = `https://www.ncei.noaa.gov/cdo-web/api/v2/${endpoint}`;
   const response = await fetch(`${URL}?${params}`, {
     method: 'GET',
