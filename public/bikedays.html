@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bike-Rideable Days</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>Bike-Rideable Days</h1>
+
+    <div class="dropdown">
+    <label for="location">Select your location:</label>
+    <select name="location" id="location">
+    </select>
+    </div>
+
+    <div class="toggle">
+        <input type="checkbox" id="extend" name="extend" value="no">
+        <label for="extend">Show extended location list (VERY long, takes ~30 seconds to fetch the first time!)</label>
+    </div>
+
+    <div class="slider">
+    <label for="minEasyTempIn">What's the lowest temperature you like for an easy morning ride?</label>
+    <input type="range" id="minEasyTempIn" min="0" max="70" value="32">
+    <output id="minEasyTempOut">32°F</output>
+    </div>
+
+    <div class="slider">
+    <label for="minAbsTempIn">What's the coldest morning temperature in which you'll ride?</label>
+    <input type="range" id="minAbsTempIn" min="-32" max="38" value="0">
+    <output id="minAbsTempOut">0°F</output>
+    </div>
+
+    <div class="slider">
+    <label for="maxTempIn">What's the hottest daytime temperature you'll ride in?</label>
+    <input type="range" id="maxTempIn" min="70" max="120" value="90">
+    <output id="maxTempOut">90°F</output>
+    </div>
+
+    <div class="slider">
+    <label for="maxRainIn">What's your rain limit?</label>
+    <input type="range" id="maxRainIn" min="0" max="1" step="0.05" value="0.2">
+    <output id="maxRainOut">0.20 in</output>
+    </div>
+
+    <div class="slider">
+    <label for="maxSnowIn">What's your snow limit?</label>
+    <input type="range" id="maxSnowIn" min="0" max="12" step="0.2" value="2">
+    <output id="maxSnowOut">2.0 in</output>
+    </div>
+
+    <div class="summary">
+        <h1 id="averageAnnualTotal">-</h1>
+        <h2 id="averageAnnualTotalLabel">average rideable days a year in</h2>
+        
+        <div style="display: flex; width: 100%; justify-content: space-between">
+            <div class="hbarlabel bar0" id="averageAnnualTotal0"></div>
+            <div class="hbarlabel bar1" id="averageAnnualTotal1"></div>
+            <div class="hbarlabel bar2" id="averageAnnualTotal2"></div>
+        </div>
+
+        <div style="display: flex; width: 100%">
+            <div class="hbar bar0" id="averageAnnualBar0"></div>
+            <div class="hbar bar1" id="averageAnnualBar1"></div>
+            <div class="hbar bar2" id="averageAnnualBar2"></div>
+        </div>
+    </div>
+
+    <div class="monthList">
+        <div style="text-align: center;">Jan</div>
+        <div style="text-align: center;">Feb</div>
+        <div style="text-align: center;">Mar</div>
+        <div style="text-align: center;">Apr</div>
+        <div style="text-align: center;">May</div>
+        <div style="text-align: center;">Jun</div>
+        <div style="text-align: center;">Jul</div>
+        <div style="text-align: center;">Aug</div>
+        <div style="text-align: center;">Sep</div>
+        <div style="text-align: center;">Oct</div>
+        <div style="text-align: center;">Nov</div>
+        <div style="text-align: center;">Dec</div>
+    </div>
+
+    <div class="monthSummary">
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth0container">
+                <div class="vbar bar0" id="averageMonth0Bar0"></div>
+                <div class="vbar bar1" id="averageMonth0Bar1"></div>
+                <div class="vbar bar2" id="averageMonth0Bar2"></div>
+            </div>
+            <div id="averageMonth0overlay" class="overlay">
+                <div id='averageMonth0overlayName'>January</div>
+                <div id='averageMonth0overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth0overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth0overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth1container">
+                <div class="vbar bar0" id="averageMonth1Bar0"></div>
+                <div class="vbar bar1" id="averageMonth1Bar1"></div>
+                <div class="vbar bar2" id="averageMonth1Bar2"></div>
+            </div>
+            <div id="averageMonth1overlay" class="overlay">
+                <div id='averageMonth1overlayName'>February</div>
+                <div id='averageMonth1overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth1overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth1overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth2container">
+                <div class="vbar bar0" id="averageMonth2Bar0"></div>
+                <div class="vbar bar1" id="averageMonth2Bar1"></div>
+                <div class="vbar bar2" id="averageMonth2Bar2"></div>
+            </div>
+            <div id="averageMonth2overlay" class="overlay">
+                <div id='averageMonth2overlayName'>March</div>
+                <div id='averageMonth2overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth2overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth2overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth3container">
+                <div class="vbar bar0" id="averageMonth3Bar0"></div>
+                <div class="vbar bar1" id="averageMonth3Bar1"></div>
+                <div class="vbar bar2" id="averageMonth3Bar2"></div>
+            </div>
+            <div id="averageMonth3overlay" class="overlay">
+                <div id='averageMonth3overlayName'>April</div>
+                <div id='averageMonth3overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth3overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth3overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth4container">
+                <div class="vbar bar0" id="averageMonth4Bar0"></div>
+                <div class="vbar bar1" id="averageMonth4Bar1"></div>
+                <div class="vbar bar2" id="averageMonth4Bar2"></div>
+            </div>
+            <div id="averageMonth4overlay" class="overlay">
+                <div id='averageMonth4overlayName'>May</div>
+                <div id='averageMonth4overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth4overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth4overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth5container">
+                <div class="vbar bar0" id="averageMonth5Bar0"></div>
+                <div class="vbar bar1" id="averageMonth5Bar1"></div>
+                <div class="vbar bar2" id="averageMonth5Bar2"></div>
+            </div>
+            <div id="averageMonth5overlay" class="overlay">
+                <div id='averageMonth5overlayName'>June</div>
+                <div id='averageMonth5overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth5overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth5overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth6container">
+                <div class="vbar bar0" id="averageMonth6Bar0"></div>
+                <div class="vbar bar1" id="averageMonth6Bar1"></div>
+                <div class="vbar bar2" id="averageMonth6Bar2"></div>
+            </div>
+            <div id="averageMonth6overlay" class="overlay">
+                <div id='averageMonth6overlayName'>July</div>
+                <div id='averageMonth6overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth6overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth6overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth7container">
+                <div class="vbar bar0" id="averageMonth7Bar0"></div>
+                <div class="vbar bar1" id="averageMonth7Bar1"></div>
+                <div class="vbar bar2" id="averageMonth7Bar2"></div>
+            </div>
+            <div id="averageMonth7overlay" class="overlay">
+                <div id='averageMonth7overlayName'>August</div>
+                <div id='averageMonth7overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth7overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth7overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth8container">
+                <div class="vbar bar0" id="averageMonth8Bar0"></div>
+                <div class="vbar bar1" id="averageMonth8Bar1"></div>
+                <div class="vbar bar2" id="averageMonth8Bar2"></div>
+            </div>
+            <div id="averageMonth8overlay" class="overlay">
+                <div id='averageMonth8overlayName'>September</div>
+                <div id='averageMonth8overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth8overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth8overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth9container">
+                <div class="vbar bar0" id="averageMonth9Bar0"></div>
+                <div class="vbar bar1" id="averageMonth9Bar1"></div>
+                <div class="vbar bar2" id="averageMonth9Bar2"></div>
+            </div>
+            <div id="averageMonth9overlay" class="overlay">
+                <div id='averageMonth9overlayName'>October</div>
+                <div id='averageMonth9overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth9overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth9overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth10container">
+                <div class="vbar bar0" id="averageMonth10Bar0"></div>
+                <div class="vbar bar1" id="averageMonth10Bar1"></div>
+                <div class="vbar bar2" id="averageMonth10Bar2"></div>
+            </div>
+            <div id="averageMonth10overlay" class="overlay">
+                <div id='averageMonth10overlayName'>November</div>
+                <div id='averageMonth10overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth10overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth10overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="averageMonth11container">
+                <div class="vbar bar0" id="averageMonth11Bar0"></div>
+                <div class="vbar bar1" id="averageMonth11Bar1"></div>
+                <div class="vbar bar2" id="averageMonth11Bar2"></div>
+            </div>
+            <div id="averageMonth11overlay" class="overlay">
+                <div id='averageMonth11overlayName'>December</div>
+                <div id='averageMonth11overlay0' style="background-color: darkgreen;"></div>
+                <div id='averageMonth11overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='averageMonth11overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="year">
+        <button id="yearDec" type="button">&lt</button>
+        <h2 id="year">2025</h2>
+        <button id="yearInc" type="button">&gt</button>
+    </div>
+
+    <div class="year">
+        <button id="fetchData" type="button">Fetch Data from NOAA</button>
+    </div>
+
+    <div id="calendar" class="calendar">
+    </div>
+
+    <div class="summary">
+        <h1 id="annualTotal"></h1>
+        <h2>rideable days</h2>
+        
+        <div style="display: flex; width: 100%; justify-content: space-between">
+            <div class="hbarlabel bar0" id="annualTotal0"></div>
+            <div class="hbarlabel bar1" id="annualTotal1"></div>
+            <div class="hbarlabel bar2" id="annualTotal2"></div>
+        </div>
+
+        <div style="display: flex; width: 100%">
+            <div class="hbar bar0" id="annualBar0"></div>
+            <div class="hbar bar1" id="annualBar1"></div>
+            <div class="hbar bar2" id="annualBar2"></div>
+        </div>
+    </div>
+
+    <div class="monthList">
+        <div style="text-align: center;">Jan</div>
+        <div style="text-align: center;">Feb</div>
+        <div style="text-align: center;">Mar</div>
+        <div style="text-align: center;">Apr</div>
+        <div style="text-align: center;">May</div>
+        <div style="text-align: center;">Jun</div>
+        <div style="text-align: center;">Jul</div>
+        <div style="text-align: center;">Aug</div>
+        <div style="text-align: center;">Sep</div>
+        <div style="text-align: center;">Oct</div>
+        <div style="text-align: center;">Nov</div>
+        <div style="text-align: center;">Dec</div>
+    </div>
+
+    <div class="monthSummary">
+        <div class="wrapper">
+            <div class="vbarContainer" id="month0container">
+                <div class="vbar bar0" id="month0Bar0"></div>
+                <div class="vbar bar1" id="month0Bar1"></div>
+                <div class="vbar bar2" id="month0Bar2"></div>
+            </div>
+            <div id="month0overlay" class="overlay">
+                <div id='month0overlayName'>January</div>
+                <div id='month0overlay0' style="background-color: darkgreen;"></div>
+                <div id='month0overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month0overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month1container">
+                <div class="vbar bar0" id="month1Bar0"></div>
+                <div class="vbar bar1" id="month1Bar1"></div>
+                <div class="vbar bar2" id="month1Bar2"></div>
+            </div>
+            <div id="month1overlay" class="overlay">
+                <div id='month1overlayName'>February</div>
+                <div id='month1overlay0' style="background-color: darkgreen;"></div>
+                <div id='month1overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month1overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month2container">
+                <div class="vbar bar0" id="month2Bar0"></div>
+                <div class="vbar bar1" id="month2Bar1"></div>
+                <div class="vbar bar2" id="month2Bar2"></div>
+            </div>
+            <div id="month2overlay" class="overlay">
+                <div id='month2overlayName'>March</div>
+                <div id='month2overlay0' style="background-color: darkgreen;"></div>
+                <div id='month2overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month2overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month3container">
+                <div class="vbar bar0" id="month3Bar0"></div>
+                <div class="vbar bar1" id="month3Bar1"></div>
+                <div class="vbar bar2" id="month3Bar2"></div>
+            </div>
+            <div id="month3overlay" class="overlay">
+                <div id='month3overlayName'>April</div>
+                <div id='month3overlay0' style="background-color: darkgreen;"></div>
+                <div id='month3overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month3overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month4container">
+                <div class="vbar bar0" id="month4Bar0"></div>
+                <div class="vbar bar1" id="month4Bar1"></div>
+                <div class="vbar bar2" id="month4Bar2"></div>
+            </div>
+            <div id="month4overlay" class="overlay">
+                <div id='month4overlayName'>May</div>
+                <div id='month4overlay0' style="background-color: darkgreen;"></div>
+                <div id='month4overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month4overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month5container">
+                <div class="vbar bar0" id="month5Bar0"></div>
+                <div class="vbar bar1" id="month5Bar1"></div>
+                <div class="vbar bar2" id="month5Bar2"></div>
+            </div>
+            <div id="month5overlay" class="overlay">
+                <div id='month5overlayName'>June</div>
+                <div id='month5overlay0' style="background-color: darkgreen;"></div>
+                <div id='month5overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month5overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month6container">
+                <div class="vbar bar0" id="month6Bar0"></div>
+                <div class="vbar bar1" id="month6Bar1"></div>
+                <div class="vbar bar2" id="month6Bar2"></div>
+            </div>
+            <div id="month6overlay" class="overlay">
+                <div id='month6overlayName'>July</div>
+                <div id='month6overlay0' style="background-color: darkgreen;"></div>
+                <div id='month6overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month6overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month7container">
+                <div class="vbar bar0" id="month7Bar0"></div>
+                <div class="vbar bar1" id="month7Bar1"></div>
+                <div class="vbar bar2" id="month7Bar2"></div>
+            </div>
+            <div id="month7overlay" class="overlay">
+                <div id='month7overlayName'>August</div>
+                <div id='month7overlay0' style="background-color: darkgreen;"></div>
+                <div id='month7overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month7overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month8container">
+                <div class="vbar bar0" id="month8Bar0"></div>
+                <div class="vbar bar1" id="month8Bar1"></div>
+                <div class="vbar bar2" id="month8Bar2"></div>
+            </div>
+            <div id="month8overlay" class="overlay">
+                <div id='month8overlayName'>September</div>
+                <div id='month8overlay0' style="background-color: darkgreen;"></div>
+                <div id='month8overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month8overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month9container">
+                <div class="vbar bar0" id="month9Bar0"></div>
+                <div class="vbar bar1" id="month9Bar1"></div>
+                <div class="vbar bar2" id="month9Bar2"></div>
+            </div>
+            <div id="month9overlay" class="overlay">
+                <div id='month9overlayName'>October</div>
+                <div id='month9overlay0' style="background-color: darkgreen;"></div>
+                <div id='month9overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month9overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month10container">
+                <div class="vbar bar0" id="month10Bar0"></div>
+                <div class="vbar bar1" id="month10Bar1"></div>
+                <div class="vbar bar2" id="month10Bar2"></div>
+            </div>
+            <div id="month10overlay" class="overlay">
+                <div id='month10overlayName'>November</div>
+                <div id='month10overlay0' style="background-color: darkgreen;"></div>
+                <div id='month10overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month10overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+        <div class="wrapper">
+            <div class="vbarContainer" id="month11container">
+                <div class="vbar bar0" id="month11Bar0"></div>
+                <div class="vbar bar1" id="month11Bar1"></div>
+                <div class="vbar bar2" id="month11Bar2"></div>
+            </div>
+            <div id="month11overlay" class="overlay">
+                <div id='month11overlayName'>December</div>
+                <div id='month11overlay0' style="background-color: darkgreen;"></div>
+                <div id='month11overlay1' style="background-color: darkgoldenrod;"></div>
+                <div id='month11overlay2' style="background-color: darkred;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="bikedays.js"></script>
+</body>
+</html>

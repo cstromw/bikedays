@@ -1,0 +1,142 @@
+.year {
+    width: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.calendar{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    width: 800px;
+    height: 650px;
+    background-color: black;
+    color: whitesmoke;
+    border-radius: 15px;
+}
+
+.weekdays{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: lightgrey;
+}
+
+.daygrid{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.wrapper{
+    position: relative;
+}
+
+.day{
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0.5px solid black;
+}
+
+.day:hover:not(.empty){
+    border: 0.5px solid white;
+    cursor: pointer;
+}
+
+.overlay{
+    display: none;
+    position: absolute;
+    top: -65px;
+    left: 50%;
+    margin-left: -35px;
+    width: 70px;
+    height: 60px;
+    border: 0.5px solid white;
+    background-color: black;
+    font-size: 12px;
+    line-height: 15px;
+    z-index: 10;
+}
+
+.visible{
+    display: block;
+}
+
+.summary{
+    width: 800px;
+    height: 250px;
+    text-align: center;
+    background-color: black;
+    color: whitesmoke;
+}
+
+.bar0{
+    background-color: DarkGreen;
+}
+
+.bar1{
+    background-color: DarkGoldenRod;
+}
+
+.bar2{
+    background-color: DarkRed;
+}
+
+.hbar{
+    width: 0%;
+    height: 50px;
+}
+
+.hbarlabel{
+    height: 15px;
+    line-height: 15px;
+    font-size: 12px;
+    padding: 5px;
+    margin: 5px;
+}
+
+.monthList{
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 5px;
+    width: 800px;
+    height:20px;
+    background-color: black;
+    color: whitesmoke;
+}
+
+.monthSummary{
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 5px;
+    width: 800px;
+    height: 302px;
+    background-color: black;
+    color: whitesmoke;
+}
+
+.vbar{
+    width: 100%;
+    height: 0%;
+}
+
+.vbarContainer{
+    height: 300px;
+    border: 0.5px solid black;
+}
+
+.vbarContainer:hover:not(.empty){
+    border: 0.5px solid white;
+    cursor: pointer;
+}
